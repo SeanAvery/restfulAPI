@@ -1,0 +1,19 @@
+{
+  "name": "restful-api",
+  "version": "1.0.0",
+  "description": "resful api in node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "node",
+    "REST",
+    "javascript"
+  ],
+  "author": "Sean Avery Pollock",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.14.0"
+  }
+}
