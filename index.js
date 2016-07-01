@@ -43,8 +43,10 @@
 //   console.log("server listening at http://%s%s", host, port)
 // })
 
+
 var express = require('express');
 var app = express();
+var multer = require('multer');
 var fs = require("fs");
 
 var IPFS = require('ipfs')
@@ -60,9 +62,32 @@ var contract = {
    }
 }
 
+var upload = multer({ dest: 'uploads/' })
+
+app.post('/',[ multer({ dest: './uploads/'}), function(req, res){
+    console.log(req.body) // form fields
+    console.log(req.files) // form files
+    res.status(204).end()
+}]);
+
+app.get('/listContracts', function(req, res){
+  fs.readFile(__dirname + "/contracts.json", "utf-8", function(err, data){
+    console.log(data)
+    res.end(data)
+  })
+})
+
+app.get('/:id', function(req,res){
+  fs.readFile(__dirname + "/contracts.json", "utf-8", function(err, data) {
+    var contracts = JSON.parse(data)
+    var contractID = contracts["contract" + req.params.id]
+    res.end(JSON.stringify(contractID))
+  })
+})
+
 app.get('/addContract', function (req, res) {
    // First read existing users.
-   fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+   fs.readFile( __dirname + "/" + "contracts.json", 'utf8', function (err, data) {
        data = JSON.parse( data );
        data["contract4"] = contract["contract4"];
        console.log( data );
@@ -79,18 +104,50 @@ app.get('/postContract', function(req, res){
   var filename = __dirname + "/documents/sampleContract1.pdf"
   var readStream = fs.createReadStream(filename)
   var stat = fs.statSync(filename)
-  console.log(stat)
   res.setHeader('Content-Length', stat.size)
   res.setHeader('Content-Type', 'application/pdf')
   res.setHeader('Content-Disposition', 'inline; filename=sampleContract1.pdf')
-  readStream.pipe(res, 'binary');
+  // readStream.pipe(res, 'binary');
+  res.end(readStream)
   // readStream.on('open', function(){
   //   res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
   //   res.setHeader('Content-type', 'application/pdf');
   //   readStream.pipe(res)
   // })
-})
 
+
+})
+// app.get('/download', function (req, res) {
+//   var options = {
+//     method: 'GET',
+//     host: 'localhost',
+//     port: port,
+//     path: '/file'
+//   };
+//
+//   var request = http.request(options, function(response) {
+//     var data = [];
+//
+//     response.on('data', function(chunk) {
+//       data.push(chunk);
+//     });
+//
+//     response.on('end', function() {
+//       data = Buffer.concat(data);
+//       console.log('requested content length: ', response.headers['content-length']);
+//       console.log('parsed content length: ', data.length);
+//       res.writeHead(200, {
+//         'Content-Type': 'application/pdf',
+//         'Content-Disposition': 'attachment; filename=working-test.pdf',
+//         'Content-Length': data.length
+//       });
+//       res.end(data);
+//     });
+//   });
+//
+//   request.end();
+// });
+//
 var server = app.listen(8081, function () {
 
   var host = server.address().address
@@ -98,3 +155,7 @@ var server = app.listen(8081, function () {
   console.log("Example app listening at http://%s:%s", host, port)
 
 })
+
+// fs.readFile(__dirname + '/documents/sampleContrac1.pdf', function(req,res){
+//   console.log(res)
+// })
